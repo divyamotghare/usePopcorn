@@ -145,6 +145,7 @@ export default function App() {
               selectedId={selectedId}
               handleCloseMovie={handleCloseMovie}
               handleAddWatched={handleAddWatched}
+              watched={watched}
             />
           ) : (
             <>
