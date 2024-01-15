@@ -12,6 +12,8 @@ import NumResults from "./components/NumResults";
 import Search from "./components/Search";
 import Summary from "./components/Summary";
 import WatchedMovieList from "./components/WatchedMovieList";
+import { useLocalStorage } from "./customHooks/useLocalStorage";
+import { useMovies } from "./customHooks/useMovies";
 
 const tempMovieData = [
   {
@@ -62,16 +64,19 @@ const tempWatchedData = [
 
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  // const [movies, setMovies] = useState([]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-  const tempQuery = "interstellar";
+  // const tempQuery = "interstellar";
 
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
-  });
+  const { movies, error, isLoading } = useMovies(query);
+  const [watched, setWatched] = useLocalStorage([], "watched");
+
+  // const [watched, setWatched] = useState(function () {
+  //   const storedValue = localStorage.getItem("watched");
+  //   return JSON.parse(storedValue);
+  // });
   const KEY = "c79f2ffe";
   // useEffect(function (){
   //   console.log('after initial render')
@@ -98,55 +103,55 @@ export default function App() {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
 
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
+  // useEffect(
+  //   function () {
+  //     localStorage.setItem("watched", JSON.stringify(watched));
+  //   },
+  //   [watched]
+  // );
 
-  useEffect(
-    function () {
-      const controller = new AbortController();
+  // useEffect(
+  //   function () {
+  //     const controller = new AbortController();
 
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError("");
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-            { signal: controller.signal }
-          );
+  //     async function fetchMovies() {
+  //       try {
+  //         setIsLoading(true);
+  //         setError("");
+  //         const res = await fetch(
+  //           `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+  //           { signal: controller.signal }
+  //         );
 
-          if (!res.ok) throw new Error("Something went wrong with fetching");
+  //         if (!res.ok) throw new Error("Something went wrong with fetching");
 
-          const data = await res.json();
-          if (data.response === "False") throw new Error("Movie not found! 😥");
-          setMovies(data.Search);
-          setError("");
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            console.log(err.message);
-            setError(err.message);
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      if (query.length < 3) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-      handleCloseMovie();
-      fetchMovies();
+  //         const data = await res.json();
+  //         if (data.response === "False") throw new Error("Movie not found! 😥");
+  //         setMovies(data.Search);
+  //         setError("");
+  //       } catch (err) {
+  //         if (err.name !== "AbortError") {
+  //           console.log(err.message);
+  //           setError(err.message);
+  //         }
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //     if (query.length < 3) {
+  //       setMovies([]);
+  //       setError("");
+  //       return;
+  //     }
+  //     handleCloseMovie();
+  //     fetchMovies();
 
-      return function () {
-        controller.abort();
-      };
-    },
-    [query]
-  );
+  //     return function () {
+  //       controller.abort();
+  //     };
+  //   },
+  //   [query]
+  // );
 
   return (
     <>
